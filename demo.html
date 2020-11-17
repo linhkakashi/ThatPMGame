@@ -1,0 +1,911 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US">
+    <head>
+        <title>The Project Management Game</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+        <meta name="description" content="The object of The Project Management Game is to assign the best staff to particular tasks and complete your project on-time and under budget."/>
+        <meta name="keywords" content="Game,Games,Browser games,Play,Project Management,Project Manager,Project Managers,PM,PMI,PMIA"/>
+        <meta name="google-site-verification" content="RrQEFa4HpicypSMczWHS4SkT2YfsTG0ncQt7xpE3mkg"/>
+        <link rel="stylesheet" type="text/css" href="./style.css"/>
+        <link rel="shortcut icon" href="./images/favicon.ico"/>
+        <script language="JavaScript" type="text/javascript">
+            maxX = 750;
+            minX = 250;
+            var gameOn = false;
+            var gamePaused = false;
+            var gameWait = false;
+            var winner = false;
+            var staffWarning = false;
+            var taskCostTotal = 0;
+            var overUnderBudget = 0;
+            var projectOnTime = false;
+            var gamesWon = 0;
+            var gamesWonValue = 0;
+            var playerName = "empty";
+            var projectTotalCost = 0;
+            var projectTotalBudg = 0;
+            var leaderBoxText = 0;
+            var tasks = new Array;
+            tasks[0] = new Array;
+            tasks[1] = new Array;
+            tasks[2] = new Array;
+            tasks[3] = new Array;
+            tasks[4] = new Array;
+            tasks[5] = new Array;
+            tasks[6] = new Array;
+            tasks[7] = new Array;
+            tasks[8] = new Array;
+            tasks[9] = new Array;
+            tasks[10] = new Array;
+            tasks[11] = new Array;
+            var staff = new Array;
+            staff[0] = new Array;
+            staff[1] = new Array;
+            staff[2] = new Array;
+            staff[3] = new Array;
+            taskCmpObjImg = new Array;
+            taskObjImg = new Array;
+            origDepTasks = new Array;
+            taskCostDiv = new Array;
+            taskCost2Div = new Array;
+            staffPullSelect = new Array;
+            staffImageObj = new Array;
+            var numTasks = 0;
+            addLoadEvent(showStart);
+            addLoadEvent(loadLeaderBoard);
+            addLoadEvent(setTaskObjects);
+            addLoadEvent(loadAds);
+            gameController = new createGameController;
+            function createGameController() {
+                gameController = this
+            }
+            function setTaskObjects() {
+                numTasks = tasks[0].length;
+                for (var i = 1; i < numTasks; i++) {
+                    taskCmpObjImg[i] = document.getElementById("taskCmpBarImg" + i);
+                    taskObjImg[i] = document.getElementById("taskBarImg" + i);
+                    taskCostDiv[i] = document.getElementById("taskCost" + i);
+                    taskCost2Div[i] = document.getElementById("taskCost2" + i);
+                    staffPullSelect[i] = document.getElementById("staffPulldown" + i);
+                    staffImageObj[i] = document.getElementById("taskStaffImg" + i);
+                    if (tasks[8][i])
+                        origDepTasks.push(i);
+                    tasks[10][i] = 0;
+                    projectTotalBudg += tasks[2][i]
+                }
+                timeLineImgObject = document.getElementById("timelineIMG");
+                timeLineDivObject = document.getElementById("timelineDIV");
+                gameOver1DivObj = document.getElementById("gameOver1");
+                gameOver2DivObj = document.getElementById("gameOver2");
+                taskCostTotalDivObj = document.getElementById("taskCostTotal");
+                messageDivObj = document.getElementById("statMessage");
+                startButtonObj = document.getElementById("startButton");
+                chanceButtonDiv = document.getElementById("chanceDiv");
+                bgArrowDiv = document.getElementById("bigArrowDiv");
+                mainTextDiv = document.getElementById("opentext");
+                mainText2Div = document.getElementById("opentext2");
+                ladyLuckImgDiv = document.getElementById("ladyLuckImg");
+                ladyLuckDiv = document.getElementById("ladyLuck");
+                msgboxDiv = document.getElementById("msgbox")
+            }
+            function messageHandler() {
+                projectTotalCost = 0;
+                messageDivObj.style.color = "red";
+                if (!overUnderBudget) {
+                    taskCostTotalDivObj.style.color = "#000000";
+                    taskCostTotalDivObj.style.fontWeight = "normal"
+                } else if (overUnderBudget > 0) {
+                    taskCostTotalDivObj.style.color = "green";
+                    taskCostTotalDivObj.style.fontWeight = "normal"
+                }
+                for (var i = 1; i < numTasks; i++) {
+                    clearElement = document.getElementById("assignOption" + i);
+                    if (!clearElement)
+                        continue;
+                    var unassStaff = true;
+                    break
+                }
+                if (overUnderBudget < 0) {
+                    messageDivObj.innerHTML = "Over Budget!";
+                    taskCostTotalDivObj.style.color = "red";
+                    taskCostTotalDivObj.style.fontWeight = "bold"
+                } else if (unassStaff)
+                    messageDivObj.innerHTML = "Assign Staff!";
+                else if (staffWarning)
+                    messageDivObj.innerHTML = "Staff Burnout!";
+                else {
+                    messageDivObj.style.color = "green";
+                    messageDivObj.innerHTML = "OK!"
+                }
+                for (var i = 1; i < numTasks; i++) {
+                    taskCostDiv[i].innerHTML = !tasks[10][i] ? "" : "$" + Math.abs(tasks[10][i]) + "K";
+                    taskCost2Div[i].innerHTML = "$" + tasks[6][i] + "K";
+                    projectTotalCost += tasks[6][i];
+                    if (tasks[10][i] < 0) {
+                        taskCostDiv[i].style.fontWeight = "bold";
+                        taskCostDiv[i].style.color = "red";
+                        taskCost2Div[i].style.color = "red"
+                    } else if (!tasks[10][i])
+                        taskCost2Div[i].style.color = "#000000";
+                    else {
+                        taskCostDiv[i].style.fontWeight = "normal";
+                        taskCostDiv[i].style.color = taskCost2Div[i].style.color = "green"
+                    }
+                }
+                taskCostTotalDivObj.innerHTML = "$" + projectTotalCost + "K";
+                staffWarning = false;
+                var objLeftPos = parseInt(timeLineDivObject.style.left);
+                if (objLeftPos > 450)
+                    addChance();
+                if (objLeftPos > 550)
+                    removeChance()
+            }
+            function addChance() {
+                chanceButtonDiv.style.display = "block";
+                ladyLuckImgDiv.style.display = "block";
+                ladyLuckDiv.style.display = "block"
+            }
+            function removeChance() {
+                if (chanceButtonDiv.parentNode)
+                    chanceButtonDiv.parentNode.removeChild(chanceButtonDiv);
+                if (ladyLuckImgDiv.parentNode)
+                    ladyLuckImgDiv.parentNode.removeChild(ladyLuckImgDiv);
+                if (ladyLuckDiv.parentNode)
+                    ladyLuckDiv.parentNode.removeChild(ladyLuckDiv)
+            }
+            function moveClock() {
+                if (numTasks < 1)
+                    return;
+                gameController.timeElapsed = microtime(true);
+                if (gameController.timeElapsed - gameController.oldTime < .04)
+                    return;
+                else
+                    gameController.oldTime = gameController.timeElapsed;
+                var objLeftPos = parseInt(timeLineDivObject.style.left);
+                if (objLeftPos >= maxX) {
+                    gameOver1DivObj.style.left = gameOver2DivObj.style.left = objLeftPos + 12 + "px";
+                    gameOver1DivObj.innerHTML = gameOver2DivObj.innerHTML = "Out of time";
+                    gameOver();
+                    tellServer(3);
+                    return
+                }
+                timeLineDivObject.style.left = objLeftPos + 1 + "px";
+                winner = true;
+                for (var i = 1; i < numTasks; i++) {
+                    if (tasks[9][i])
+                        continue;
+                    winner = false;
+                    var depTask = tasks[8][i];
+                    if (!in_array(i, origDepTasks) && objLeftPos < tasks[1][i])
+                        continue;
+                    if (depTask && tasks[9][depTask])
+                        tasks[8][i] = depTask = 0;
+                    if (taskCmpObjImg[i].width < tasks[2][i] & !depTask)
+                        if (rollDice(.33) || objLeftPos > .98 * maxX) {
+                            advanceRate = tasks[5][i];
+                            assignedStaff = staffPullSelect[i].value;
+                            for (var j = 1; j < numTasks; j++) {
+                                if (i == j || tasks[9][j] || taskCmpObjImg[j].width < 2)
+                                    continue;
+                                if (staffPullSelect[j].value == "unassigned")
+                                    continue;
+                                if (assignedStaff == staffPullSelect[j].value) {
+                                    advanceRate = 1;
+                                    staffWarning = true;
+                                    break
+                                }
+                            }
+                            taskCmpObjImg[i].width += advanceRate;
+                            taskCostChange = Math.floor(advanceRate * (tasks[7][i] / 3));
+                            tasks[6][i] += taskCostChange;
+                            tasks[10][i] += advanceRate - taskCostChange;
+                            overUnderBudget += advanceRate - taskCostChange
+                        }
+                    checkCompleteTask(i)
+                }
+                if (winner) {
+                    gameOver1DivObj.style.left = gameOver2DivObj.style.left = objLeftPos + 12 + "px";
+                    if (overUnderBudget < 0) {
+                        gameOver1DivObj.innerHTML = gameOver2DivObj.innerHTML = "Over Budget";
+                        winner = false;
+                        tellServer(4)
+                    } else {
+                        timeLineDivObject.style.width = "10px";
+                        gameOver1DivObj.innerHTML = gameOver2DivObj.innerHTML = "On time!";
+                        messageDivObj.style.color = "green";
+                        messageDivObj.innerHTML = "Under Budget!";
+                        for (var i = 1; i < numTasks; i++)
+                            taskObjImg[i].src = "./images/spgrn.png";
+                        tellServer(2)
+                    }
+                    projectOnTime = true;
+                    gameOver()
+                }
+            }
+            function startGame() {
+                if (gameWait) {
+                    location.reload(true);
+                    return
+                }
+                if (gameOn && !gamePaused) {
+                    gamePaused = true;
+                    startButtonObj.value = "Resume";
+                    clearInterval(gameLoop);
+                    clearInterval(messageLoop);
+                    return
+                } else if (gameOn && gamePaused) {
+                    gamePaused = false;
+                    startButtonObj.value = "Pause";
+                    gameLoop = setInterval(function() {
+                        moveClock()
+                    }, 10);
+                    messageLoop = setInterval(function() {
+                        messageHandler()
+                    }, 300);
+                    return
+                }
+                var clearElement = 0;
+                for (var i = 1; i < numTasks; i++) {
+                    clearElement = document.getElementById("assignOption" + i);
+                    if (!clearElement)
+                        continue;
+                    if (!confirm("You have not assigned staff to all of the tasks yet, are you sure you want to start?"))
+                        return;
+                    break
+                }
+                gameOn = true;
+                gameLoop = setInterval(function() {
+                    moveClock()
+                }, 10);
+                messageLoop = setInterval(function() {
+                    messageHandler()
+                }, 300);
+                startButtonObj.value = "Pause";
+                if (bgArrowDiv)
+                    bgArrowDiv.innerHTML = "";
+                mainTextDiv.innerHTML = '<p><span class="playerNameFloatMed" ' + 'style="color:black;text-decoration:underline;font-weight:bold;">' + playerName + "</span> Quick!  Make sure that you have staff assigned to every task and " + "that they are getting the job done fast enough.  And keep an eye on " + "that budget!</p>";
+                tellServer(1)
+            }
+            function tellServer(gameState) {
+                var xhttp = new XMLHttpRequest;
+                xhttp.open("GET", "connect.php?" + gameState.toString(), true);
+                xhttp.send()
+            }
+            function gameOver() {
+                window.clearInterval(gameLoop);
+                window.clearInterval(messageLoop);
+                gameOn = false;
+                gameWait = true;
+                startButtonObj.value = "Again?";
+                removeChance();
+                document.getElementById("rankbutton").style.visibility = "hidden";
+                if (winner) {
+                    gamesWonValue += projectTotalBudg;
+                    var newWinValue = (gamesWonValue / 1E3).toFixed(1);
+                    mainTextDiv.innerHTML = '<p><span class="playerNameFloatMed" ' + 'style="color:black;text-decoration:underline;font-weight:bold;">' + playerName + "</span> " + "is a Winner!  You are a great PM! " + "Too easy? Remember that the tasks and resources are generated " + "randomly, try again for a more challenging project.<br/><br/>You " + "have completed " + (gamesWon + 1) + " projects valued at $" + newWinValue + " " + "million</p>";
+                    msgboxDiv.innerHTML = '<div id="winloseimg"><img src="images/win.jpg" ' + 'alt="Winner trophy"></div><div id="losetext"><br/>&nbsp;&nbsp;&nbsp;' + "Winner!</div>"
+                } else {
+                    for (var i = 1; i < numTasks; i++) {
+                        clearElement = document.getElementById("assignOption" + i);
+                        if (!clearElement)
+                            continue;
+                        var incompleteAssign = true;
+                        break
+                    }
+                    var newWinValue = (gamesWonValue / 1E3).toFixed(1);
+                    var msg1 = "<p>Sometimes your staff just don't measure up. Congratulations though, you did <b><u>save the company money!</u></b> and often there is no harm in being a little late.  Try again and remember the chance button comes up in the 3rd week.</p>";
+                    var msg2 = "<p>Sometimes your staff just don't measure up. Congratulations though, you did <b><u>finish on time!</u></b> and sometimes spending more to deliver high quality fast is best.  Try again and remember the chance button comes up in the 3rd week.</p>";
+                    var msg3 = "<p>Sometimes your staff just don't measure up. PMs rarely get to choose their own staff and it is important to shake it off and move on to the next project.  Try again and remember the chance button comes up in the 3rd week.</p>";
+                    var msg4 = "<p>Hmmm... you must assign staff to every task to complete the project.  Refer to the 'Instructions' tab at the top of the page if you want more help.  Go ahead and try again!</p>";
+                    if (incompleteAssign)
+                        mainTextDiv.innerHTML = msg4;
+                    else
+                        mainTextDiv.innerHTML = overUnderBudget >= 0 ? msg1 : projectOnTime ? msg2 : msg3;
+                    if (gamesWon)
+                        mainTextDiv.innerHTML += "<p>You have completed " + gamesWon + " projects valued at $" + newWinValue + " million</p>";
+                    msgboxDiv.innerHTML = '<div id="winloseimg"><img src="images/lose.png" alt="back to drawing board"></div><div id="losetext">You lose...<br/>Back to the<br/>Drawing Board</div>'
+                }
+            }
+            function checkCompleteTask(i) {
+                if (taskCmpObjImg[i].width >= tasks[2][i]) {
+                    taskCmpObjImg[i].width = tasks[2][i];
+                    tasks[9][i] = true;
+                    taskObjImg[i].src = "./images/spdrk.png"
+                }
+            }
+            function staffChange(task) {
+                newStaff = staffPullSelect[task].value;
+                tasks[5][task] = staff[1][newStaff];
+                tasks[7][task] = staff[2][newStaff];
+                tasks[11][task] = newStaff;
+                switch (task) {
+                case 1:
+                    if (document.taskForm1.taskAssignment1.options.length > 4)
+                        document.taskForm1.taskAssignment1.options[0] = null;
+                    break;
+                case 2:
+                    if (document.taskForm2.taskAssignment2.options.length > 4)
+                        document.taskForm2.taskAssignment2.options[0] = null;
+                    break;
+                case 3:
+                    if (document.taskForm3.taskAssignment3.options.length > 4)
+                        document.taskForm3.taskAssignment3.options[0] = null;
+                    break;
+                case 4:
+                    if (document.taskForm4.taskAssignment4.options.length > 4)
+                        document.taskForm4.taskAssignment4.options[0] = null;
+                    break;
+                case 5:
+                    if (document.taskForm5.taskAssignment5.options.length > 4)
+                        document.taskForm5.taskAssignment5.options[0] = null;
+                    break
+                }
+                staffImageObj[task].src = "./images/" + staff[3][newStaff]
+            }
+            function chanceCard() {
+                if (!gameOn)
+                    return;
+                var chance = new Array;
+                chance[0] = "slowTime()";
+                for (var i = 1; i < numTasks; i++) {
+                    if (tasks[9][i])
+                        continue;
+                    if (taskCmpObjImg[i].width < 2)
+                        chance.push("completeTask(" + i + ")");
+                    else if (taskCmpObjImg[i].width < .8 * tasks[2][i]) {
+                        amt = rollDice(.5) ? 50 : -10;
+                        chance.push("changeTaskCmp(" + i + "," + amt + ")");
+                        chance.push("changeTaskCst(" + i + "," + amt + ")")
+                    }
+                }
+                for (var i = 0; i < staff.length; i++) {
+                    if (staff[1][i] == 2 || staff[1][i] == 3)
+                        chance.push("changeStaffRate(" + i + ",2)");
+                    else if (staff[1][i] == 4 || staff[1][i] == 5)
+                        chance.push("changeStaffRate(" + i + ",-1)");
+                    if (staff[2][i] == 4 || staff[2][i] == 5)
+                        chance.push("changeStaffCost(" + i + ",-2)")
+                }
+                eval(chance[Math.floor(Math.random() * chance.length)]);
+                alert(msg);
+                function changeStaffCost(i, amt) {
+                    staff[2][i] += amt;
+                    for (var j = 1; j < numTasks; j++) {
+                        if (i != tasks[11][j])
+                            continue;
+                        tasks[7][j] = staff[2][i]
+                    }
+                    msg = amt < 0 ? staff[0][i] + " took a training class and now works cheaper!" : staff[0][i] + " has adopted unusual management ideas and now costs more"
+                }
+                function changeStaffRate(i, amt) {
+                    staff[1][i] += amt;
+                    for (var j = 1; j < numTasks; j++) {
+                        if (i != tasks[11][j])
+                            continue;
+                        tasks[5][j] = staff[1][i]
+                    }
+                    msg = amt > 0 ? staff[0][i] + " took a training class and now works faster!" : staff[0][i] + " is not feeling well and now works slower."
+                }
+                function changeTaskCst(i, amt) {
+                    msg = amt < 0 ? "Rising costs, Task " + i + " is more expensive" : "Cost Savings!, Task " + i + " is cheaper";
+                    taskCostChange = amt - 2;
+                    tasks[10][i] += amt;
+                    overUnderBudget += amt
+                }
+                function changeTaskCmp(i, amt) {
+                    msg = amt < 0 ? "You have encountered a setback, Task " + i + " has fallen back" : "Breakthrough!, Task " + i + " has advanced";
+                    taskCmpObjImg[i].width += amt;
+                    if (taskCmpObjImg[i].width < 0)
+                        taskCmpObjImg[i].width = 0;
+                    checkCompleteTask(i);
+                    taskCostChange = amt;
+                    tasks[6][i] += taskCostChange;
+                    tasks[10][i] += amt - taskCostChange;
+                    overUnderBudget += amt - taskCostChange
+                }
+                function completeTask(i) {
+                    msg = "You get some help from another Division.  Task " + i + " is complete and under budget";
+                    taskCmpObjImg[i].width = tasks[2][i];
+                    taskCostChange = tasks[2][i] - 2;
+                    tasks[6][i] += taskCostChange;
+                    tasks[10][i] += tasks[2][i] - taskCostChange;
+                    overUnderBudget += tasks[2][i] - taskCostChange;
+                    checkCompleteTask(i)
+                }
+                function slowTime() {
+                    msg = "Boss had a psychadelic vision.  No wait, what did he say?  Oh yeah... a vision statement. Time slows down.";
+                    window.clearInterval(gameLoop);
+                    gameLoop = setInterval(function() {
+                        moveClock()
+                    }, 100)
+                }
+                tellServer(5);
+                removeChance()
+            }
+            function rollDice(rate) {
+                return Math.floor(Math.random() * 100) < rate * 100 ? 1 : 0
+            }
+            function randOrd() {
+                return Math.round(Math.random()) - .5
+            }
+            function microtime(getFloat) {
+                var now = (new Date).getTime() / 1E3;
+                var s = parseInt(now);
+                return getFloat ? now : Math.round((now - s) * 1E3) / 1E3 + " " + s
+            }
+            function addLoadEvent(func) {
+                var oldonload = window.onload;
+                if (typeof window.onload != "function")
+                    window.onload = func;
+                else
+                    window.onload = function() {
+                        if (oldonload)
+                            oldonload();
+                        func()
+                    }
+            }
+            function in_array(what, where) {
+                var a = false;
+                for (var i = 0; i < where.length; i++)
+                    if (what == where[i]) {
+                        a = true;
+                        break
+                    }
+                return a
+            }
+            function loadLeaderBoard() {
+                document.getElementById("msgbox").innerHTML = document.getElementById("msgBoxContent").innerHTML
+            }
+            function showStart() {
+                document.getElementById("staffWait").innerHTML = null;
+                var divs = document.getElementsByClassName("hideStart");
+                for (i = 0; i < divs.length; i++)
+                    divs[i].style.visibility = "visible"
+            }
+            function leaderBoxChange() {
+                var replaceText = "";
+                var target = document.getElementById("msgBoxContent");
+                leaderBoxText = leaderBoxText > 1 ? 0 : leaderBoxText + 1;
+                if (leaderBoxText == 1) {
+                    target = document.getElementById("msgBoxContent1");
+                    replaceText = target.innerHTML;
+                    document.getElementById("rankbutton").value = " All-time leaders "
+                } else if (leaderBoxText == 2) {
+                    target = document.getElementById("msgBoxContent2");
+                    replaceText = target.innerHTML;
+                    document.getElementById("rankbutton").value = " Best player..."
+                } else {
+                    replaceText = target.innerHTML;
+                    document.getElementById("rankbutton").value = " Weekly Best "
+                }
+                document.getElementById("msgbox").innerHTML = replaceText
+            }
+            function loadAds() {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                (adsbygoogle = window.adsbygoogle || []).push({})
+            }
+            ;</script>
+        <!-- <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> -->
+    </head>
+    <body>
+        <div id="everything">
+            <!-- Top Banner -->
+            <div id="topStuff" style="position:absolute;top:2px;left:6px;z-index:0;width:990px">
+                <table border="0" width="980" align="left">
+                    <tr>
+                        <th nowrap="nowrap">
+                            <div id="maintitle">The Project Management Game</div>
+                            <div id="tagline" class="cntr bold sml em red">"Test your skill as a project manager!"</div>
+                        </th>
+                        <td align="center" width="800">
+                            <div id="topad">
+                                <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                                <!-- thatPMgame,topAd, 468x60, created 6/17/10 -->
+                                <ins class="adsbygoogle" style="display:inline-block;width:468px;height:60px" data-ad-client="ca-pub-8556499457263966" data-ad-slot="7556025395"></ins>
+                                <!--
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+-->
+                            </div>
+                        </td>
+                        <td width="200">
+                        <td width="50">
+                            <a href="/login/">Login</a>
+                        </td>
+                        <td>
+                            <a href="/register/">Register</a>
+                        </td>
+</td></tr></table></div>
+<!-- Top Menu -->
+<!-- <div class='menumsg'>Also try the <u>Senior PM Version</u> at <a href="http://sr.thatpmgame.com">sr.thatpmgame.com</a> (beta)</div>-->
+<div class='headertabs' style='position:absolute;top:85px;left:0px;z-index:0;white-space:nowrap;width:990px;'>
+    <div style="width:980px;">
+        <ul>
+            <li class="current">
+                <a href="http://thatpmgame.com/">Game</a>
+            </li>
+            <li>
+                <a href="http://thatpmgame.com/instructions/">Instructions</a>
+            </li>
+            <li>
+                <a href="http://thatpmgame.com/feedback/">Discuss</a>
+            </li>
+        </ul>
+    </div>
+</div>
+<!-- Project H-O-N-E-Y-P-O-T -->
+<!-- <a href="http://rcharney.com/software.php">meek</a> -->
+<div id="wrapper">
+    <div id="sidead">
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!-- thatPMgame,linkAdSide,180x90, created 6/17/10 -->
+        <ins class="adsbygoogle" style="display:inline-block;width:180px;height:150px" data-ad-client="ca-pub-8556499457263966" data-ad-slot="8116706945"></ins>
+        <!--
+  <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+  -->
+    </div>
+    <div id="bottomad">
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!-- thatPMgame,bottomAd, 728x90, created 6/17/10 -->
+        <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-8556499457263966" data-ad-slot="3845275577"></ins>
+        <!--
+  <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+  -->
+    </div>
+    <div id="opentext">
+        <p>
+        <div id="msdintro">
+            <div id="msdintro2">Welcome to thatPMGame!</div>
+            Your team and budget are on the right. Assign team members to tasks and
+      hit START. Good luck!
+        </div>
+        <div id="msdstuff">
+            <div id="playerNameFloat">Manager2329</div>
+            completed <span id="wincount">0</span>
+            projects on-time and under-budget valued at $<span id="winval">0.0</span>
+            million. <a href="/register/">Register a name</a>
+            to save your score.
+        </div>
+</p></div><div id="ladyLuck">Care to try Lady Luck?  Click here</div>
+<div id="ladyLuckImg">
+    <img src="./images/smlArrow.gif" alt="small arrow"/>
+</div>
+<div id="resourcebox">
+    <div id="yourresources">Your resources</div>
+    <div id="yourbudget" class="your">Your budget: $976,000</div>
+    <div id="yourstaff" class="your">Your staff: </div>
+    <div class="staffpic" style="top:87px;">
+        <img src="./images/redIgrm.png" width="8px" alt="stickman"/>
+        John<div class="stafftxt">John is low-cost</div>
+    </div>
+    <div class="staffpic" style="top:109px;">
+        <img src="./images/bluIgrm.png" width="8px" alt="stickman"/>
+        Vicky<div class="stafftxt">Vicky is average</div>
+    </div>
+    <div class="staffpic" style="top:131px;">
+        <img src="./images/gldIgrm.png" width="8px" alt="stickman"/>
+        Ann<div class="stafftxt">Ann is average</div>
+    </div>
+    <div class="staffpic" style="top:153px;">
+        <img src="./images/orgIgrm.png" width="8px" alt="stickman"/>
+        Marti<div class="stafftxt">Marti is slow</div>
+    </div>
+</div>
+<div id="gantt">
+    <div id="ganttbackground">
+        <img src="images/gantt_background.jpg" alt="background"/>
+    </div>
+    <div class="tasktxt bold" style="top:44px;">Project start</div>
+    <div class="tasktxt bold" style="top:230px;">Project complete</div>
+    <div class="taskbar" style="top:72px;left:426px;">
+        <img id="taskStaffImg1" src="./images/blank.gif" width="12px" alt="assigned staff"/>
+    </div>
+    <div class="taskbar" style="top:75px;left:446px;">
+        <img id="taskBarImg1" src="./images/spred.png" width="229px" height="15px" alt="task"/>
+    </div>
+    <div id="taskCmpBarDiv1" class="taskcmp" style="top:81px;left:446px;">
+        <img id="taskCmpBarImg1" src="./images/spblk.png" width="1px" height="3px" alt="task"/>
+    </div>
+    <div class="tasktxt" style="top:75px;">-Restart the thingy</div>
+    <div id="taskCost1" class="taskcst" style="left:678px;top:75px;"></div>
+    <div class="taskbar" style="top:103px;left:414px;">
+        <img id="taskStaffImg2" src="./images/blank.gif" width="12px" alt="assigned staff"/>
+    </div>
+    <div class="taskbar" style="top:106px;left:434px;">
+        <img id="taskBarImg2" src="./images/spred.png" width="247px" height="15px" alt="task"/>
+    </div>
+    <div id="taskCmpBarDiv2" class="taskcmp" style="top:112px;left:434px;">
+        <img id="taskCmpBarImg2" src="./images/spblk.png" width="1px" height="3px" alt="task"/>
+    </div>
+    <div class="tasktxt" style="top:106px;">-Do that other thing</div>
+    <div id="taskCost2" class="taskcst" style="left:684px;top:106px;"></div>
+    <div class="taskbar" style="top:134px;left:230px;">
+        <img id="taskStaffImg3" src="./images/blank.gif" width="12px" alt="assigned staff"/>
+    </div>
+    <div class="taskbar" style="top:137px;left:250px;">
+        <img id="taskBarImg3" src="./images/spred.png" width="205px" height="15px" alt="task"/>
+    </div>
+    <div id="taskCmpBarDiv3" class="taskcmp" style="top:143px;left:250px;">
+        <img id="taskCmpBarImg3" src="./images/spblk.png" width="1px" height="3px" alt="task"/>
+    </div>
+    <div class="tasktxt" style="top:137px;">-Realign the doodad</div>
+    <div id="taskCost3" class="taskcst" style="left:458px;top:137px;"></div>
+    <div class="taskbar" style="top:165px;left:435px;">
+        <img id="taskStaffImg4" src="./images/blank.gif" width="12px" alt="assigned staff"/>
+    </div>
+    <div class="taskbar" style="top:168px;left:455px;">
+        <img id="taskBarImg4" src="./images/spred.png" width="140px" height="15px" alt="task"/>
+    </div>
+    <div id="taskCmpBarDiv4" class="taskcmp" style="top:174px;left:455px;">
+        <img id="taskCmpBarImg4" src="./images/spblk.png" width="1px" height="3px" alt="task"/>
+    </div>
+    <div class="tasktxt" style="top:168px;">-Test the gizmo</div>
+    <div id="taskCost4" class="taskcst" style="left:598px;top:168px;"></div>
+    <div class="taskbar" style="top:196px;left:575px;">
+        <img id="taskStaffImg5" src="./images/blank.gif" width="12px" alt="assigned staff"/>
+    </div>
+    <div class="taskbar" style="top:199px;left:595px;">
+        <img id="taskBarImg5" src="./images/spred.png" width="155px" height="15px" alt="task"/>
+    </div>
+    <div id="taskCmpBarDiv5" class="taskcmp" style="top:205px;left:595px;">
+        <img id="taskCmpBarImg5" src="./images/spblk.png" width="1px" height="3px" alt="task"/>
+    </div>
+    <div class="tasktxt" style="top:199px;">-Calibrate the doohickey</div>
+    <div id="taskCost5" class="taskcst" style="left:753px;top:199px;"></div>
+    <script language="JavaScript" type="text/javascript">
+        playerName = "Manager2329";
+        gamesWon = 0;
+        gamesWonValue = 0;
+        tasks[0][1] = 81;
+        tasks[1][1] = 446;
+        tasks[2][1] = 229;
+        tasks[3][1] = 3;
+        tasks[4][1] = 229;
+        tasks[5][1] = 0;
+        tasks[6][1] = 0;
+        tasks[7][1] = 0;
+        tasks[8][1] = 0;
+        tasks[9][1] = 0;
+        tasks[0][2] = 112;
+        tasks[1][2] = 434;
+        tasks[2][2] = 247;
+        tasks[3][2] = 3;
+        tasks[4][2] = 247;
+        tasks[5][2] = 0;
+        tasks[6][2] = 0;
+        tasks[7][2] = 0;
+        tasks[8][2] = 0;
+        tasks[9][2] = 0;
+        tasks[0][3] = 143;
+        tasks[1][3] = 250;
+        tasks[2][3] = 205;
+        tasks[3][3] = 3;
+        tasks[4][3] = 205;
+        tasks[5][3] = 0;
+        tasks[6][3] = 0;
+        tasks[7][3] = 0;
+        tasks[8][3] = 0;
+        tasks[9][3] = 0;
+        tasks[0][4] = 174;
+        tasks[1][4] = 455;
+        tasks[2][4] = 140;
+        tasks[3][4] = 3;
+        tasks[4][4] = 140;
+        tasks[5][4] = 0;
+        tasks[6][4] = 0;
+        tasks[7][4] = 0;
+        tasks[8][4] = 3;
+        tasks[9][4] = 0;
+        tasks[0][5] = 205;
+        tasks[1][5] = 595;
+        tasks[2][5] = 155;
+        tasks[3][5] = 3;
+        tasks[4][5] = 155;
+        tasks[5][5] = 0;
+        tasks[6][5] = 0;
+        tasks[7][5] = 0;
+        tasks[8][5] = 4;
+        tasks[9][5] = 0;
+        staff[0][0] = "John";
+        staff[1][0] = 3;
+        staff[2][0] = 2;
+        staff[3][0] = "redIgrm.png";
+        staff[0][1] = "Vicky";
+        staff[1][1] = 3;
+        staff[2][1] = 3;
+        staff[3][1] = "bluIgrm.png";
+        staff[0][2] = "Ann";
+        staff[1][2] = 3;
+        staff[2][2] = 3;
+        staff[3][2] = "gldIgrm.png";
+        staff[0][3] = "Marti";
+        staff[1][3] = 2;
+        staff[2][3] = 3;
+        staff[3][3] = "orgIgrm.png";
+    </script>
+    <div class="taskcmp" style="top:59px;left:250px;">
+        <img src="./images/spblk.png" width="1px" height="78px" alt="vert line"/>
+    </div>
+    <div class="taskcmp" style="top:130px;left:247px;">
+        <img src="./images/arrowhead.gif" alt="arrowhead"/>
+    </div>
+    <div class="taskcmp" style="top:152px;left:455px;">
+        <img src="./images/spblk.png" width="1px" height="16px" alt="vert line"/>
+    </div>
+    <div class="taskcmp" style="top:161px;left:452px;">
+        <img src="./images/arrowhead.gif" alt="arrowhead"/>
+    </div>
+    <div class="taskcmp" style="top:183px;left:595px;">
+        <img src="./images/spblk.png" width="1px" height="16px" alt="vert line"/>
+    </div>
+    <div class="taskcmp" style="top:192px;left:592px;">
+        <img src="./images/arrowhead.gif" alt="arrowhead"/>
+    </div>
+    <div class="taskcmp" style="top:214px;left:750px;">
+        <img src="./images/spblk.png" width="1px" height="16px" alt="vert line"/>
+    </div>
+    <div class="taskcmp" style="top:223px;left:747px;">
+        <img src="./images/arrowhead.gif" alt="arrowhead"/>
+    </div>
+    <div class="taskcmp" id="milestone">
+        <img src="./images/milestone.gif" alt="milestone"/>
+    </div>
+    <div class="taskcmp" style="top:230px;left:743px;">
+        <img src="./images/milestone.gif" alt="milestone"/>
+    </div>
+    <div id="timelineDIV" style="left:235px;">
+        <img id="timelineIMG" src="images/timeLine.gif" style="border:none;"/>
+    </div>
+    <div id="gameOver1" class="gameovertxt"></div>
+    <div id="gameOver2" class="gameovertxt"></div>
+</div>
+<div id="staffbox">
+    <form method="post" action="/">
+        <div id="startDiv">
+            <input id="startButton" class="hideStart" type="submit" value=" Start! " name="2" onClick="startGame();return false;"/>
+        </div>
+    </form>
+    <form method="post" action="/">
+        <div id="chanceDiv">
+            <input id="chanceButton" type="submit" value=" Chance! " name="2" onClick="chanceCard();return false;"/>
+        </div>
+    </form>
+    <div id="spent">Spent</div>
+    <div id="spentln">____</div>
+    <div id="staffWait">Wait for staff...</div>
+    <form method="post" action="/" name="taskForm1">
+        <div style="position:absolute;left:2px;top:69px;">
+            <select id="staffPulldown1" class="hideStart" name="taskAssignment1" style="width:80px;" onChange="staffChange(1);">
+                <option id="assignOption1" value="unassigned" selected="selected">assign?</option>
+                <option value="0">John</option>
+                <option value="1">Vicky</option>
+                <option value="2">Ann</option>
+                <option value="3">Marti</option>
+            </select>
+        </div>
+    </form>
+    <div class="taskCost2" id="taskCost21" style="top:69px;">$0k</div>
+    <form method="post" action="/" name="taskForm2">
+        <div style="position:absolute;left:2px;top:100px;">
+            <select id="staffPulldown2" class="hideStart" name="taskAssignment2" style="width:80px;" onChange="staffChange(2);">
+                <option id="assignOption2" value="unassigned" selected="selected">assign?</option>
+                <option value="0">John</option>
+                <option value="1">Vicky</option>
+                <option value="2">Ann</option>
+                <option value="3">Marti</option>
+            </select>
+        </div>
+    </form>
+    <div class="taskCost2" id="taskCost22" style="top:100px;">$0k</div>
+    <form method="post" action="/" name="taskForm3">
+        <div style="position:absolute;left:2px;top:131px;">
+            <select id="staffPulldown3" class="hideStart" name="taskAssignment3" style="width:80px;" onChange="staffChange(3);">
+                <option id="assignOption3" value="unassigned" selected="selected">assign?</option>
+                <option value="0">John</option>
+                <option value="1">Vicky</option>
+                <option value="2">Ann</option>
+                <option value="3">Marti</option>
+            </select>
+        </div>
+    </form>
+    <div class="taskCost2" id="taskCost23" style="top:131px;">$0k</div>
+    <form method="post" action="/" name="taskForm4">
+        <div style="position:absolute;left:2px;top:162px;">
+            <select id="staffPulldown4" class="hideStart" name="taskAssignment4" style="width:80px;" onChange="staffChange(4);">
+                <option id="assignOption4" value="unassigned" selected="selected">assign?</option>
+                <option value="0">John</option>
+                <option value="1">Vicky</option>
+                <option value="2">Ann</option>
+                <option value="3">Marti</option>
+            </select>
+        </div>
+    </form>
+    <div class="taskCost2" id="taskCost24" style="top:162px;">$0k</div>
+    <form method="post" action="/" name="taskForm5">
+        <div style="position:absolute;left:2px;top:193px;">
+            <select id="staffPulldown5" class="hideStart" name="taskAssignment5" style="width:80px;" onChange="staffChange(5);">
+                <option id="assignOption5" value="unassigned" selected="selected">assign?</option>
+                <option value="0">John</option>
+                <option value="1">Vicky</option>
+                <option value="2">Ann</option>
+                <option value="3">Marti</option>
+            </select>
+        </div>
+    </form>
+    <div class="taskCost2" id="taskCost25" style="top:193px;">$0k</div>
+    <div id="taskCostTotal"></div>
+    <div id="statMessage"></div>
+</div>
+<div id="msgboxlink">
+    <input id="rankbutton" type="submit" value=" Weekly Best " name="rankbutton" onClick="leaderBoxChange();return false;"/>
+</div>
+<div id="msgbox"></div>
+<div id="msgBoxContent">
+    <div id="msgBoxTitle">Today's Best PM, Nov 17</div>
+    <div id="msgBoxName">Manager9851</div>
+    <div id="msgBoxCount">Manager9851 completed 7 projects worth $6,099,000</div>
+</div>
+<div id="msgBoxContent1">
+    <div class="msgboxtopline">Top players (7 days)</div>
+    1)  (40 @ $33,785,000)<br/>
+    2) Budget5914 (27 @ $23,385,000)<br/>
+    3) Waterfall8275 (23 @ $19,622,000)<br/>
+    4) Gantt7503 (21 @ $17,487,000)<br/>
+    5) Critical3879 (20 @ $16,473,000)<br/>
+    6) Critical2593 (17 @ $14,256,000)<br/>
+</div>
+<div id="msgBoxContent2">
+    <div class="msgboxtopline">All-time best PMs (registered only)</div>
+    1) Azim (498 @ $421,182,000)<br/>
+    2) The Boss (254 @ $216,282,000)<br/>
+    3) Kenflag (197 @ $167,178,000)<br/>
+    4) AlexCronin (169 @ $142,459,000)<br/>
+    5) JustForFun (163 @ $138,409,000)<br/>
+    6) rezzaaidil07 (145 @ $123,326,000)<br/>
+</div>
+</div>
+<div style="position:absolute;top:750px;left:0px;width:990px;">
+    <img src="./images/spred.png" width="990px" height="5px" alt="redline"/>
+    <br/>
+    &nbsp;&nbsp;<a href="/privacy/">Privacy Policy</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="mailto:robc@gamesbyrobc.com">Contact us: "Robc"</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/terms/"">Site Terms and Conditions</    >
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=" http://gamesbyrobc.com"">more games...</a>
+    <br/>
+    <br/>
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-1324763-42']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        }
+        )();
+    </script>
+    <!-- Start Quantcast tag -->
+    <script type="text/javascript">
+        _qoptions = {
+            qacct: "p-e6M2E6I0tveHU"
+        };
+    </script>
+    <script type="text/javascript" src="http://edge.quantserve.com/quant.js"></script>
+    <noscript>
+        <img src="http://pixel.quantserve.com/pixel/p-e6M2E6I0tveHU.gif" style="display: none;" border="0" height="1" width="1" alt="Quantcast"/>
+    </noscript>
+    <!-- End Quantcast tag -->
+</div>
+</div>
+<!-- everything -->
+</body></html>
